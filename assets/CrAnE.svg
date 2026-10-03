@@ -1,6 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <clipPath id="silhouette"><path d="M0 10L6 10L14 12L16 12L16 16L0 16ZM6 10L12 3L10 11Z"/></clipPath>
+  </defs>
   <rect width="16" height="16" fill="#eee"/>
   <polygon fill="#ccc" points="6,10 5,4 10,10"/>
-  <polygon fill="#aaa" points="6,10 12,3 10,11"/>
-  <polyline fill="none" stroke="#aaa" stroke-width=".5" points="2,10 6,10 14,12"/>
+  <g clip-path="url(#silhouette)">
+    <polygon fill="#aaa" points="6,10 12,3 10,11"/>
+    <polyline fill="none" stroke="#aaa" stroke-width="1" points="2,10 6,10 14,12"/>
+  </g>
 </svg>

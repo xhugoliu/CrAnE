@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { deflateSync, inflateSync } from 'node:zlib';
 
-// The complete design: integer vertices, two triangles and one polyline.
+// Integer control points: two triangles and the upper edge of a one-sided band.
 const design = {
   grid: 16,
   size: 1024,
@@ -19,31 +19,45 @@ const palette = Buffer.from(design.palette.flatMap(color =>
   [...color.slice(1)].map(digit => Number.parseInt(digit + digit, 16))));
 
 function makeSvg() {
+  // Clip a doubled stroke to the lower side or the near wing. Including the
+  // wing in one continuous clip path allows the paint to overlap internally,
+  // avoiding an antialiasing seam along their shared edge.
+  const upper = design.line.points;
+  const clip = [[0, upper[0][1]], ...upper.slice(1),
+    [design.grid, upper.at(-1)[1]], [design.grid, design.grid], [0, design.grid]];
+  const path = points => `M${points.map(point => point.join(' ')).join('L')}Z`;
+  const [far, near] = design.wings;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${design.grid} ${design.grid}">\n`
+    + '  <defs>\n'
+    + `    <clipPath id="silhouette"><path d="${path(clip)}${path(near.points)}"/></clipPath>\n`
+    + '  </defs>\n'
     + `  <rect width="${design.grid}" height="${design.grid}" fill="${design.palette[0]}"/>\n`
-    + design.wings.map(wing => `  <polygon fill="${design.palette[wing.color]}" points="${coordinates(wing.points)}"/>\n`).join('')
-    + `  <polyline fill="none" stroke="${design.palette[design.line.color]}" stroke-width="${String(design.line.width).replace(/^0\./, '.')}" points="${coordinates(design.line.points)}"/>\n`
+    + `  <polygon fill="${design.palette[far.color]}" points="${coordinates(far.points)}"/>\n`
+    + '  <g clip-path="url(#silhouette)">\n'
+    + `    <polygon fill="${design.palette[near.color]}" points="${coordinates(near.points)}"/>\n`
+    + `    <polyline fill="none" stroke="${design.palette[design.line.color]}" stroke-width="${design.line.width * 2}" points="${coordinates(upper)}"/>\n`
+    + '  </g>\n'
     + '</svg>\n';
 }
 
-// Expand the line to its SVG butt-capped, miter-joined filled outline.
-function lineOutline({ points, width }) {
+// The given points form the visible upper edge. Offset only toward the lower
+// side, retaining perpendicular end caps and a miter join at the corner.
+function bandOutline({ points, width }) {
   const normals = points.slice(1).map(([x, y], index) => {
     const dx = x - points[index][0], dy = y - points[index][1];
     const length = Math.hypot(dx, dy);
     return [-dy / length, dx / length];
   });
-  const left = [], right = [];
+  const lower = [];
   points.forEach(([x, y], index) => {
     const before = normals[Math.max(0, index - 1)];
     const after = normals[Math.min(normals.length - 1, index)];
-    const scale = (width / 2) / (1 + before[0] * after[0] + before[1] * after[1]);
+    const scale = width / (1 + before[0] * after[0] + before[1] * after[1]);
     const dx = (before[0] + after[0]) * scale;
     const dy = (before[1] + after[1]) * scale;
-    left.push([x + dx, y + dy]);
-    right.push([x - dx, y - dy]);
+    lower.push([x + dx, y + dy]);
   });
-  return [...left, ...right.reverse()];
+  return [...points, ...lower.reverse()];
 }
 
 function contains(points, x, y) {
@@ -57,7 +71,7 @@ function contains(points, x, y) {
 
 function rasterize() {
   const { size, grid } = design;
-  const shapes = [...design.wings, { color: design.line.color, points: lineOutline(design.line) }];
+  const shapes = [...design.wings, { color: design.line.color, points: bandOutline(design.line) }];
   // Each row starts with PNG filter type 0, followed by palette indices.
   const rows = Buffer.alloc((size + 1) * size);
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
@@ -146,7 +160,7 @@ const rows = rasterize();
 if (args[0] === '--check') {
   assert.equal(readFileSync(asset('CrAnE.svg'), 'utf8'), svg, 'SVG matches the design');
   verifyPng(readFileSync(asset('CrAnE.png')), rows);
-  console.log('Verified: integer vertices, 0.5 stroke, 1024 × 1024, three ACE colors, every pixel matches.');
+  console.log('Verified: integer control points, 0.5 one-sided band, 1024 × 1024, three ACE colors, every pixel matches.');
 } else {
   const png = makePng(rows);
   verifyPng(png, rows);
