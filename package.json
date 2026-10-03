@@ -1,0 +1,13 @@
+{
+  "name": "crane",
+  "private": true,
+  "type": "module",
+  "description": "Two wings, one line, three grays.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/crane.mjs",
+    "check": "node scripts/crane.mjs --check"
+  }
+}
