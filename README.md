@@ -26,13 +26,13 @@
 
 <table>
   <tr>
-    <td align="center"><img src="assets/background/GrusGrus.png" width="220" alt="最初的去色灰鹤头像"><br><strong>Grus grus</strong><br>姿态与留白</td>
+    <td align="center"><img src="assets/background/GrusGrus.png" width="220" alt="最初的去色灰鹤头像"><br><strong>GrusGrus</strong><br>姿态与留白</td>
     <td align="center"><img src="assets/background/xhugoliu.png" width="220" alt="由五个方块构成的三色几何 X 头像"><br><strong>acex</strong><br>灰阶与秩序</td>
     <td align="center"><img src="assets/CrAnE.png" width="220" alt="定稿的 CrAnE 几何灰鹤头像"><br><strong>CrAnE</strong><br>形态与规则</td>
   </tr>
 </table>
 
-它起于一张用了多年的头像：去色处理的灰鹤（*Grus grus*），在大面积留白中展翅飞行，带有一点水墨气息。后来，头像换成了只有三档灰阶、由五个方块构成的几何 X。
+它起于一张用了多年的头像：去色处理的灰鹤（*GrusGrus*），在大面积留白中展翅飞行，带有一点水墨气息。后来，头像换成了只有三档灰阶、由五个方块构成的几何 X。
 
 CrAnE 保留灰鹤的飞行姿态，也继承几何 X 的克制。羽毛、眼睛和喙的细节逐渐退去，留下两片翼面与一条向前伸展、向后下折的线。所有顶点都落在整数网格上，构造可以用一小段话说清楚。
 
