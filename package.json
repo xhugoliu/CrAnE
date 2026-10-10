@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "node scripts/crane.mjs",
-    "check": "node scripts/crane.mjs --check"
+    "check": "node scripts/crane.mjs --check",
+    "preview": "node scripts/preview.mjs"
   }
 }

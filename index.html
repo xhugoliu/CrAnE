@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eeeeee">
+  <meta name="description" content="三档灰，两片翼，一折线。看 CrAnE 从十六格网格中成形。">
+  <title>CrAnE · 从几何到灰鹤</title>
+  <style>
+    :root { color-scheme: light; --paper: #eee; --ink: #666; --quiet: #777; --a: #aaa; --c: #ccc; --mono: ui-monospace, 'SFMono-Regular', Consolas, monospace; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; -webkit-font-smoothing: antialiased; }
+    button, input { font: inherit; }
+    button, a, input { -webkit-tap-highlight-color: transparent; }
+    button { color: inherit; }
+    button:focus-visible, a:focus-visible, input:focus-visible { outline: 1px solid #777; outline-offset: 5px; border-radius: 2px; }
+    button { cursor: pointer; }
+    .page { max-width: 1120px; margin: auto; padding: 34px 48px 24px; }
+    .masthead { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .identity { display: flex; align-items: baseline; gap: 17px; }
+    .wordmark { margin: 0; font-size: 26px; font-weight: 400; letter-spacing: -.055em; line-height: 1; color: #666; }
+    .wordmark .lower { color: #999; }
+    .edition { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--quiet); }
+    .source { font-family: var(--mono); font-size: 11px; color: var(--quiet); text-decoration: none; }
+    .source:hover { color: #444; }
+    .source span { margin-left: 5px; }
+    main { width: 100%; }
+    .artwork { position: relative; margin: 12px auto 0; width: min(100%, 640px, 66svh); aspect-ratio: 1; }
+    #scene { display: block; width: 100%; height: 100%; overflow: visible; }
+    .grid-line { fill: none; stroke: #aaa; stroke-width: .014; }
+    .grid-line.major { stroke-width: .022; }
+    .grid-label { font-family: var(--mono); font-size: .25px; fill: #888; text-anchor: middle; }
+    .trace { fill: none; stroke: #aaa; stroke-width: .046; stroke-linejoin: miter; stroke-dasharray: 1; }
+    .marker { fill: #eee; stroke: #888; stroke-width: .023; }
+    .marker.core { fill: #aaa; stroke: #eee; stroke-width: .025; }
+    .marker-ring { fill: none; stroke: #aaa; stroke-width: .014; }
+    .point-label { font-family: var(--mono); font-size: .29px; fill: #777; font-weight: 400; }
+    .leader { fill: none; stroke: #aaa; stroke-width: .016; }
+    .caption { margin: 0; text-align: center; min-height: 53px; }
+    .caption h2 { margin: 0 0 9px; color: #666; font-size: 15px; font-weight: 400; letter-spacing: .16em; }
+    .caption p { margin: 0; min-height: 17px; color: var(--quiet); font-size: 11px; letter-spacing: .045em; }
+    .playback { max-width: 536px; margin: 26px auto 0; }
+    .transport { display: flex; align-items: center; gap: 20px; min-height: 30px; }
+    .control { display: inline-flex; gap: 7px; align-items: center; padding: 4px 0; border: 0; background: transparent; font-size: 11px; line-height: 20px; }
+    .control:hover { color: #333; }
+    .control svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.25; }
+    #play-icon { fill: currentColor; stroke: none; }
+    .loop { display: inline-flex; gap: 7px; align-items: center; margin-left: auto; font-size: 11px; cursor: pointer; }
+    .loop input { appearance: none; width: 10px; height: 10px; border: 1px solid #aaa; margin: 0; border-radius: 50%; cursor: pointer; }
+    .loop input:checked { background: #aaa; box-shadow: inset 0 0 0 2px var(--paper); }
+    .scrubber { display: block; width: 100%; height: 24px; margin: 5px 0 3px; padding: 0; appearance: none; background: transparent; cursor: ew-resize; }
+    .scrubber::-webkit-slider-runnable-track { height: 1px; background: linear-gradient(to right, #999 var(--progress, 0%), #d5d5d5 var(--progress, 0%)); }
+    .scrubber::-moz-range-track { height: 1px; background: #d5d5d5; }
+    .scrubber::-moz-range-progress { height: 1px; background: #999; }
+    .scrubber::-webkit-slider-thumb { appearance: none; height: 7px; width: 7px; border-radius: 50%; margin-top: -3px; background: #999; }
+    .scrubber::-moz-range-thumb { height: 7px; width: 7px; border: 0; border-radius: 50%; background: #999; }
+    .chapters { display: flex; justify-content: space-between; gap: 8px; }
+    .chapter { border: 0; background: transparent; padding: 5px 0; color: #858585; font-size: 10px; letter-spacing: .055em; text-align: center; }
+    .chapter .number { margin-right: 5px; font: 9px var(--mono); color: #999; }
+    .chapter[aria-current="step"], .chapter[aria-current="step"] .number { color: #555; }
+    .chapter:hover { color: #444; }
+    footer { margin-top: 38px; padding-top: 15px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 20px; font: 10px var(--mono); color: #777; }
+    .palette { display: flex; flex-shrink: 0; align-items: center; gap: 17px; }
+    .swatch { display: inline-flex; align-items: center; gap: 6px; }
+    .chip { width: 7px; height: 7px; background: var(--swatch); }
+    .chip.paper { box-shadow: inset 0 0 0 1px #ccc; }
+    .colophon { margin-left: auto; flex-shrink: 0; white-space: nowrap; font: 10px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; letter-spacing: .06em; }
+    .fallback { display: none; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    @media (max-width: 560px) {
+      .page { padding: 25px 23px 22px; }
+      .identity { gap: 12px; }
+      .wordmark { font-size: 24px; }
+      .edition { font-size: 9px; }
+      .source { font-size: 10px; }
+      .artwork { width: 100%; margin-top: 36px; }
+      .point-label { font-size: .43px; }
+      .grid-label { font-size: .32px; }
+      .caption { margin-top: 22px; }
+      .caption h2 { font-size: 14px; }
+      .caption p { font-size: 10px; }
+      .playback { margin-top: 30px; }
+      .transport { gap: 19px; }
+      .chapter .number { display: block; margin: 0 0 5px; }
+      footer { margin-top: 34px; }
+      .palette { gap: 12px; }
+    }
+    @media (max-height: 650px) and (min-width: 561px) {
+      .page { padding-top: 23px; }
+      .artwork { width: min(56svh, 490px); margin-top: 0; }
+      .playback { margin-top: 15px; }
+      footer { margin-top: 20px; }
+    }
+  </style>
+  <noscript><style>.artwork,.playback,.caption{display:none}.fallback{display:block;max-width:480px;width:100%;margin:48px auto}</style></noscript>
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div class="identity">
+        <h1 class="wordmark" aria-label="CrAnE">C<span class="lower">r</span>A<span class="lower">n</span>E</h1>
+        <span class="edition">A GEOMETRIC STUDY</span>
+      </div>
+      <a class="source" href="https://github.com/xhugoliu/CrAnE" target="_blank" rel="noopener noreferrer">GitHub<span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main>
+      <div class="artwork">
+        <svg id="scene" viewBox="-1 -1 18 18" role="img" aria-labelledby="scene-title scene-desc">
+          <title id="scene-title">CrAnE 的几何构造</title>
+          <desc id="scene-desc">在十六格网格上标记坐标，依次绘制浅灰翼面、深灰翼面和半格宽的单侧色带，最后移除辅助标记，留下灰鹤。</desc>
+          <defs>
+            <clipPath id="silhouette"><path d="M0 10L6 10L14 12L16 12L16 16L0 16ZM6 10L12 3L10 11Z"/></clipPath>
+          </defs>
+          <rect id="paper" width="16" height="16" fill="#eee" opacity="0"/>
+          <g id="grid" opacity="0" aria-hidden="true"></g>
+          <g id="crane">
+            <polygon id="far-wing" fill="#ccc" points="6,10 5,4 10,10" opacity="0"/>
+            <g clip-path="url(#silhouette)">
+              <polygon id="near-wing" fill="#aaa" points="6,10 12,3 10,11" opacity="0"/>
+              <polyline id="band" fill="none" stroke="#aaa" stroke-width="1" points="2,10 6,10 14,12" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1" opacity="0"/>
+            </g>
+          </g>
+          <path id="far-trace" class="trace" d="M6 10L5 4L10 10Z" pathLength="1" opacity="0" aria-hidden="true"/>
+          <path id="near-trace" class="trace" d="M6 10L12 3L10 11Z" pathLength="1" opacity="0" aria-hidden="true"/>
+          <g id="points" aria-hidden="true"></g>
+        </svg>
+      </div>
+      <noscript><img class="fallback" src="assets/CrAnE.svg" alt="CrAnE 几何灰鹤。启用 JavaScript 可以播放构造动画。"></noscript>
+      <div class="caption" aria-live="polite" aria-atomic="true">
+        <h2 id="phase-title">从留白开始</h2>
+        <p id="phase-description">先给一只鹤，留出空间。</p>
+      </div>
+
+      <section class="playback" aria-label="动画播放控制">
+        <div class="transport">
+          <button class="control" id="toggle" type="button" title="播放或暂停 · 空格">
+            <svg viewBox="0 0 12 12" aria-hidden="true"><g id="pause-icon"><path d="M4 2v8M8 2v8"/></g><path id="play-icon" d="M3 1.5L10 6 3 10.5Z" style="display:none"/></svg>
+            <span id="toggle-label">暂停</span>
+          </button>
+          <button class="control" id="replay" type="button" title="从头重播">
+            <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4a4.3 4.3 0 1 1-.2 3M2 1v3h3"/></svg>
+            <span>重播</span>
+          </button>
+          <label class="loop"><input id="loop" type="checkbox" checked><span>循环</span></label>
+        </div>
+        <label for="scrubber" class="sr-only">动画进度</label>
+        <input class="scrubber" id="scrubber" type="range" min="0" max="14000" step="10" value="0" aria-valuetext="0 秒，共 14 秒">
+        <nav class="chapters" aria-label="跳转到构造步骤">
+          <button class="chapter" data-chapter="0" type="button"><span class="number">01</span>留白</button>
+          <button class="chapter" data-chapter="1" type="button"><span class="number">02</span>网格</button>
+          <button class="chapter" data-chapter="2" type="button"><span class="number">03</span>坐标</button>
+          <button class="chapter" data-chapter="3" type="button"><span class="number">04</span>翼面</button>
+          <button class="chapter" data-chapter="4" type="button"><span class="number">05</span>折线</button>
+          <button class="chapter" data-chapter="5" type="button"><span class="number">06</span>成形</button>
+        </nav>
+      </section>
+    </main>
+
+    <footer>
+      <div class="palette" aria-label="三档灰阶：C、A、E">
+        <span class="swatch"><span class="chip" style="--swatch:#ccc" aria-hidden="true"></span>#CCC</span>
+        <span class="swatch"><span class="chip" style="--swatch:#aaa" aria-hidden="true"></span>#AAA</span>
+        <span class="swatch"><span class="chip paper" style="--swatch:#eee" aria-hidden="true"></span>#EEE</span>
+      </div>
+      <span class="colophon">三档灰，两片翼，一折线。</span>
+    </footer>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+      const duration = 14000;
+      const $ = id => document.getElementById(id);
+      const ns = 'http://www.w3.org/2000/svg';
+      const ease = t => t * t * (3 - 2 * t);
+      const ramp = (time, start, end) => ease(Math.min(1, Math.max(0, (time - start) / (end - start))));
+      const opacity = (element, value) => element.setAttribute('opacity', value.toFixed(4));
+      const make = (tag, attributes, parent, text) => {
+        const element = document.createElementNS(ns, tag);
+        for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+        if (text !== undefined) element.textContent = text;
+        parent.append(element);
+        return element;
+      };
+
+      const gridLines = [];
+      for (let i = 0; i <= 16; i++) {
+        gridLines.push(make('path', { d: `M${i} 0V16M0 ${i}H16`, class: `grid-line${i % 4 === 0 ? ' major' : ''}` }, $('grid')));
+      }
+      const gridLabels = make('g', {}, $('grid'));
+      for (let i = 0; i <= 16; i += 4) {
+        make('text', { x: i, y: -.32, class: 'grid-label' }, gridLabels, i);
+        make('text', { x: -.43, y: i + .08, class: 'grid-label' }, gridLabels, i);
+      }
+
+      const anchors = [
+        { x: 6, y: 10, label: '(6,10)', lx: 5.66, ly: 10.94, align: 'end', root: true },
+        { x: 5, y: 4, label: '(5,4)', lx: 4.7, ly: 3.89, align: 'end' },
+        { x: 10, y: 10, label: '(10,10)', lx: 11.63, ly: 9.83, leader: 'M10 10L11.38 9.73' },
+        { x: 12, y: 3, label: '(12,3)', lx: 12.28, ly: 2.9 },
+        { x: 10, y: 11, label: '(10,11)', lx: 10.35, ly: 11.7 },
+        { x: 2, y: 10, label: '(2,10)', lx: 1.82, ly: 9.58, align: 'middle' },
+        { x: 14, y: 12, label: '(14,12)', lx: 14.25, ly: 12.12 },
+      ].map((point, i) => {
+        const element = make('g', { opacity: 0 }, $('points'));
+        if (point.leader) make('path', { d: point.leader, class: 'leader' }, element);
+        if (point.root) make('circle', { cx: point.x, cy: point.y, r: .16, class: 'marker-ring' }, element);
+        make('circle', { cx: point.x, cy: point.y, r: point.root ? .075 : .065, class: `marker${point.root ? ' core' : ''}` }, element);
+        make('text', { x: point.lx, y: point.ly, class: 'point-label', 'text-anchor': point.align || 'start' }, element, point.label);
+        return { element, start: 1900 + i * 115, end: point.root ? 11100 : 10400 + i * 55 };
+      });
+
+      const chapters = [
+        { start: 0, preview: 600, title: '从留白开始', description: '先给一只鹤，留出空间。' },
+        { start: 1050, preview: 1700, title: '十六格，恰好', description: '为每一次伸展，找到尺度。' },
+        { start: 1900, preview: 3000, title: '在这里相遇', description: '以 (6,10) 为支点，记下七个位置。' },
+        { start: 3300, preview: 6900, title: '两片翼，前后展开', description: 'C 在后，A 在前。姿态从三个点中出现。' },
+        { start: 7900, preview: 9000, title: '一折，连成飞行', description: '宽半格的色带，与两片翼面共用一个折角。' },
+        { start: 10000, preview: 14000, title: '让规则隐去', description: '留下三档灰，和一只鹤。' },
+      ];
+      const chapterButtons = [...document.querySelectorAll('[data-chapter]')];
+      const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+      let time = 0, playing = false, frame = 0, previous = 0, activeChapter = -1, settled = false;
+      const far = $('far-wing'), near = $('near-wing'), band = $('band');
+      const farTrace = $('far-trace'), nearTrace = $('near-trace');
+      const range = $('scrubber');
+
+      function render(value) {
+        time = Math.min(duration, Math.max(0, value));
+        const paper = ramp(time, 0, 1050);
+        const shade = Math.round(255 - paper * 17);
+        document.body.style.backgroundColor = `rgb(${shade},${shade},${shade})`;
+        opacity($('paper'), paper);
+        const gridOut = 1 - ramp(time, 10900, 12400);
+        opacity($('grid'), gridOut);
+        gridLines.forEach((line, i) => opacity(line, .46 * ramp(time, 950 + i * 25, 1450 + i * 25)));
+        opacity(gridLabels, ramp(time, 1350, 1850));
+        for (const point of anchors) opacity(point.element, ramp(time, point.start, point.start + 380) * (1 - ramp(time, point.end, point.end + 480)));
+
+        const farDraw = ramp(time, 3300, 4850), farFill = ramp(time, 4570, 5350);
+        const nearDraw = ramp(time, 5500, 7100), nearFill = ramp(time, 6800, 7650);
+        farTrace.setAttribute('stroke-dashoffset', 1 - farDraw);
+        nearTrace.setAttribute('stroke-dashoffset', 1 - nearDraw);
+        opacity(farTrace, (time >= 3300 ? 1 : 0) * (1 - farFill));
+        opacity(nearTrace, (time >= 5500 ? 1 : 0) * (1 - nearFill));
+        opacity(far, farFill);
+        opacity(near, nearFill);
+        const lineDraw = ramp(time, 7900, 9650);
+        opacity(band, time >= 7900 ? 1 : 0);
+        band.setAttribute('stroke-dashoffset', 1 - lineDraw);
+
+        const index = chapters.findLastIndex(chapter => time >= chapter.start);
+        const isSettled = time >= 12400;
+        if (index !== activeChapter || isSettled !== settled) {
+          activeChapter = index;
+          settled = isSettled;
+          $('phase-title').textContent = isSettled ? 'CrAnE' : chapters[index].title;
+          $('phase-description').textContent = isSettled ? '三档灰，两片翼，一折线。' : chapters[index].description;
+          chapterButtons.forEach((button, i) => {
+            if (i === index) button.setAttribute('aria-current', 'step');
+            else button.removeAttribute('aria-current');
+          });
+        }
+        $('scene').dataset.stage = String(index + 1);
+        range.value = Math.round(time);
+        range.style.setProperty('--progress', `${time / duration * 100}%`);
+        range.setAttribute('aria-valuetext', `${(time / 1000).toFixed(1)} 秒，共 14 秒，${chapters[index].title}`);
+      }
+
+      function updateControl() {
+        $('toggle-label').textContent = playing ? '暂停' : time >= duration ? '重播' : '播放';
+        $('pause-icon').style.display = playing ? '' : 'none';
+        $('play-icon').style.display = playing ? 'none' : '';
+        $('toggle').setAttribute('aria-label', playing ? '暂停动画' : time >= duration ? '重播动画' : '播放动画');
+      }
+      function tick(now) {
+        if (!playing || document.hidden) return;
+        const next = time + Math.max(0, now - previous);
+        previous = now;
+        if (next >= duration) {
+          if ($('loop').checked) render(next % duration);
+          else { render(duration); playing = false; updateControl(); return; }
+        } else render(next);
+        frame = requestAnimationFrame(tick);
+      }
+      function play() {
+        cancelAnimationFrame(frame);
+        if (time >= duration) render(0);
+        playing = true;
+        previous = performance.now();
+        updateControl();
+        frame = requestAnimationFrame(tick);
+      }
+      function pause() {
+        playing = false;
+        cancelAnimationFrame(frame);
+        updateControl();
+      }
+      function replay() { render(0); play(); }
+      $('toggle').addEventListener('click', () => playing ? pause() : play());
+      $('replay').addEventListener('click', replay);
+      range.addEventListener('input', () => { pause(); render(Number(range.value)); updateControl(); });
+      chapterButtons.forEach((button, i) => button.addEventListener('click', () => { pause(); render(chapters[i].preview); updateControl(); }));
+      document.addEventListener('keydown', event => {
+        if (event.code !== 'Space' || /^(INPUT|BUTTON|A|TEXTAREA|SELECT)$/.test(event.target.tagName) || event.target.isContentEditable) return;
+        event.preventDefault();
+        playing ? pause() : play();
+      });
+      document.addEventListener('visibilitychange', () => {
+        cancelAnimationFrame(frame);
+        if (playing && !document.hidden) { previous = performance.now(); frame = requestAnimationFrame(tick); }
+      });
+      reducedMotion.addEventListener('change', event => {
+        if (event.matches) { pause(); render(duration); updateControl(); }
+      });
+      render(reducedMotion.matches ? duration : 0);
+      updateControl();
+      if (!reducedMotion.matches) play();
+    })();
+  </script>
+</body>
+</html>
