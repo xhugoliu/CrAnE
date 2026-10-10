@@ -6,24 +6,9 @@
 
 <a href="https://xhugoliu.github.io/CrAnE/"><img src="assets/CrAnE-construction.gif" width="512" height="512" alt="CrAnE 构造动画：网格与坐标渐入，两片翼面和折线依次成形，辅助标记随后退场。点击打开 HTML 交互版。"></a>
 
-[SVG](assets/CrAnE.svg) · [1024 × 1024 PNG](assets/CrAnE.png) · [交互动画 ↗](https://xhugoliu.github.io/CrAnE/) · [HTML 源文件](index.html)
+[SVG](assets/CrAnE.svg) · [1024 × 1024 PNG](assets/CrAnE.png) · [交互动画 ↗](https://xhugoliu.github.io/CrAnE/)
 
 </div>
-
-## 看它成形
-
-[交互动画](https://xhugoliu.github.io/CrAnE/) 是一段约 **14 秒**的构造动画：背景与网格渐入，关键坐标浮现，两片翼面依次描边、填充，再绘出单侧色带。坐标与网格随后退场，定稿短暂停留后默认循环播放；取消“循环”可在定稿处停下。
-
-README 顶部内嵌同一段构造动画的 [GIF 预览](assets/CrAnE-construction.gif)，直接循环播放，画面只保留灰鹤与辅助标记。GIF 首帧使用定稿，因此加载或显示静态缩略图时也能看到完整头像。
-
-点击 README 顶图或“交互动画”链接即可打开在线 HTML 版，支持暂停、重播、循环、拖动进度及按步骤查看。系统启用“减少动态效果”时，默认展示静态定稿，可手动播放。[HTML 源文件](index.html) 也保留在仓库中，下载后直接用浏览器打开即可离线播放，无需安装依赖。
-
-也可以启动本地预览：
-
-```sh
-npm run preview
-# 打开 http://127.0.0.1:4173
-```
 
 ## 名字里有什么
 
