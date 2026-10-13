@@ -8,7 +8,7 @@ const design = {
   size: 1024,
   palette: ['#eee', '#ccc', '#aaa'],
   wings: [
-    { color: 1, points: [[6, 10], [5, 4], [10, 10]] },
+    { color: 1, points: [[6, 10], [5, 4], [10, 11]] },
     { color: 2, points: [[6, 10], [12, 3], [10, 11]] },
   ],
   line: { color: 2, width: 0.5, points: [[2, 10], [6, 10], [14, 12]] },
